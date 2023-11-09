@@ -1,4 +1,4 @@
-import { Component,EventEmitter,Input, Output } from '@angular/core';
+import { Component,Input,Output , EventEmitter} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
@@ -13,19 +13,26 @@ import { loggeduser } from 'src/app/modals/modal';
   styleUrls: ['./left-nav.component.scss']
 })
 export class LeftNavComponent {
-
-  @Output() navigateToProfile: EventEmitter<string>= new EventEmitter<string>();
   @Input() userDetails:loggeduser={name:'',emailaddress:'',employeeId:'',role:''};
+  @Output() showNavChange = new EventEmitter<boolean>();
+  activeItem: any;
+
   constructor(private router:Router){}
 
 
   ngOnInit(){
     this.userDetails=JSON.parse(<string>localStorage.getItem('currentUser'));
   }
+  
   toMe() {
-    this.navigateToProfile.emit("me");
+    this.showNavChange.emit(true);
+    this.activeItem = 'me';
+    this.router.navigate(['/pulseSurvey/home/openSurveys']);
   }
-  toAdmin(){
-    this.navigateToProfile.emit("admin");
+
+  toAdmin() {
+    this.showNavChange.emit(false);
+    this.activeItem = 'admin';
+    this.router.navigate(['/pulseSurvey/home/Admin/surveys/active']);
   }
 }

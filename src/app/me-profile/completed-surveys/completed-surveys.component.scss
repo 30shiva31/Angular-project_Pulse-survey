@@ -1,4 +1,10 @@
 @import "~@ng-select/ng-select/themes/material.theme.css";
+
+.completed-surveys-container {
+    overflow-y: scroll;
+    max-height: 626px;
+}
+
 .select-filter-picker{
     width:350px;
 
