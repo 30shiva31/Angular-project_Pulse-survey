@@ -13,9 +13,9 @@ import { loggeduser } from '../modals/modal';
     selector: 'app-login-employee',
     standalone: true,
     imports: [CommonModule, ReactiveFormsModule],
-    templateUrl: './login-employee.component.html',
-    styleUrls: ['./login-employee.component.scss'],
+    templateUrl: './login-employee.component.html'
 })
+
 export class LoginEmployeeComponent {
   currentUser:loggeduser={employeeId:'',role:'',emailaddress:'',name:''}
   loginForm!:FormGroup;
@@ -25,8 +25,8 @@ export class LoginEmployeeComponent {
 
   ngOnInit(){
     this.loginForm = this.fb.group({
-      email:[''],
-      password:['']
+      email:['',Validators.required],
+      password:['',Validators.required]
     })
   }
 
@@ -38,9 +38,6 @@ export class LoginEmployeeComponent {
         this.setCurrentUser(decodedToken);
         this.udService.setCredentials(this.currentUser);
          this.router.navigate(['/pulseSurvey/home']);
-      },
-      error:(e)=>{
-        console.log('Error',e);
       }})
     this.router.navigate(['/pulseSurvey/home']);
   }

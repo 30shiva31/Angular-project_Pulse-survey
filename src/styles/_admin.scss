@@ -1,0 +1,11 @@
+.active a::after {
+    border-bottom-color: #e3e5e8;
+}
+
+.active a {
+    font-weight: 600;
+}
+
+.nav-admin{
+    background-color: var(--primary-nav-background) !important;
+}
