@@ -10,8 +10,8 @@ import { BsDropdownDirective, BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { BsDatepickerModule, BsDatepickerConfig } from 'ngx-bootstrap/datepicker';
 
 import { ApiService } from 'src/app/services/api.service';
-import { SurveyData } from 'src/app/modals/launchSurveyData';
-import { SurveyQuestion } from 'src/app/modals/launchSurveyQuestions';
+import { SurveyData } from 'src/app/models/launchSurveyData.model';
+import { SurveyQuestion } from 'src/app/models/launchSurveyQuestions.model';
 import { ModalService } from 'src/app/services/modal-service.service';
 
 enum ActiveStep {
@@ -50,15 +50,10 @@ export class LaunchSurveyComponent implements OnInit {
     @ViewChild('dropdown', { static: true }) dropdown!: BsDropdownDirective;
     @ViewChild('launchNewSurvey', { static: true })
     launchNewSurvey!: TemplateRef<any>;
-    guid: any;
 
     constructor(private router: Router, private bsModalService: BsModalService, private modalService: ModalService, private apiService: ApiService, private formBuilder: FormBuilder, private datePipe: DatePipe) {}
 
     ngOnInit(): void {
-        let qid = Guid.create();
-        // let guidValue = qid.value;
-        let guidValue: string = Reflect.get(qid, 'value');
-        console.log(guidValue);
         this.basicFieldsForm = this.formBuilder.group({
             surveyId: [''],
             surveyName: ['', [Validators.required]],
@@ -86,10 +81,6 @@ export class LaunchSurveyComponent implements OnInit {
         });
     }
 
-    hideModal(modalRef: BsModalRef) {
-        modalRef.hide();
-    }
-
     generateOptionFormControl(optionId: number, optionText: string) {
         return this.formBuilder.group({
             optionId: [optionId],
@@ -101,19 +92,18 @@ export class LaunchSurveyComponent implements OnInit {
         const surveyQuestionFormsArray = this.formResponses.map((response) => response.surveyQuestionForm.value);
         const customSurveyQuestionFormsArray = surveyQuestionFormsArray.map((formValue: any) => {
             const options = formValue.inputFields.map((option: any, index: number) => ({ optionId: index + 1, optionText: option }));
-            let qid = Guid.create();
-            let surveyQuestionId: string = Reflect.get(qid, 'value');
+            let newsurveyQuestionId = Guid.create();
+            let surveyQuestionId: string = Reflect.get(newsurveyQuestionId, 'value');
             return new SurveyQuestion(surveyQuestionId, formValue.surveyQuestionName, formValue.surveyQuestionDescription, formValue.radiobutton, options);
         });
-        let qid = Guid.create();
-        let surveyId: string = Reflect.get(qid, 'value');
+        let createSurveyId = Guid.create();
+        let surveyId: string = Reflect.get(createSurveyId, 'value');
 
         const surveyData = new SurveyData(surveyId, this.basicFieldsForm.value.surveyName, this.basicFieldsForm.value.surveyDescription, this.formatDate(new Date()), this.formatDate(this.basicFieldsForm.value.surveyExpiry), 1, customSurveyQuestionFormsArray);
-        console.log(surveyData);
         this.apiService.sendSurveyQuestions(surveyData);
-        this.hideModal(this.fullModalRef);
-        this.hideModal(this.launchSurveyModalRef);
-        this.router.navigate(['/pulseSurvey/home/Admin/surveys/active']);
+        this.launchSurveyModalRef.hide();
+        this.fullModalRef.hide();
+        this.router.navigate(['/pulseSurvey/home/admin/surveys/active']);
     }
 
     validateField(field: string) {
@@ -121,6 +111,12 @@ export class LaunchSurveyComponent implements OnInit {
         if (control) {
             control.markAsTouched();
         }
+    }
+
+    hide() {
+        this.fullModalRef.hide();
+        this.launchSurveyModalRef.hide();
+        this.router.navigate(['/pulseSurvey/home/admin/surveys/active']);
     }
 
     addInputField(index: number) {
@@ -195,6 +191,10 @@ export class LaunchSurveyComponent implements OnInit {
         }
     }
 
+    hideModal(modalRef: BsModalRef) {
+        modalRef.hide();
+    }
+
     getSurveyDescription() {
         const selectedTemplate = this.exisitngTemplates.find((template: { templateTitle: string }) => template.templateTitle === this.selectedItem);
         return selectedTemplate ? selectedTemplate.templateDescription : '';
@@ -223,7 +223,6 @@ export class LaunchSurveyComponent implements OnInit {
     onSave() {
         this.updateActiveStep(2);
         if (this.selectedItem != 'Create a new survey') {
-            console.log('entereddd');
             this.templateId = this.getTemplateIdByName(this.selectedItem);
             this.apiService.getTemplateQuestions(this.templateId).subscribe((templateQuestions: any) => {
                 templateQuestions.forEach((question: any) => {

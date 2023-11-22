@@ -3,8 +3,9 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { BehaviorSubject } from 'rxjs';
 
-import { Employee } from '../modals/Employee';
-import { VerifyEmployee } from '../modals/verifyEmployee';
+import { Employee } from '../models/employee.model';
+import { VerifyEmployee } from '../models/verifyEmployee.model';
+import { SpinnerVisibilityService } from 'ng-http-loader';
 
 @Injectable({
     providedIn: 'root',
@@ -16,9 +17,7 @@ export class ApiService {
     private surveyUpdatedSource = new BehaviorSubject<any>(null);
     surveyUpdated$ = this.surveyUpdatedSource.asObservable();
 
-    constructor(private http: HttpClient) {
-        this.token = JSON.parse(<string>localStorage.getItem('token')).token;
-    }
+    constructor(private http: HttpClient, private spinner: SpinnerVisibilityService) {}
 
     getVerifyEmployee(empData: VerifyEmployee) {
         const headers = new HttpHeaders().set('Authorization', `Bearer ${this.token}`);
@@ -26,6 +25,7 @@ export class ApiService {
     }
 
     getEmployeeDetails() {
+        this.token = JSON.parse(<string>localStorage.getItem('token')).token;
         const headers = new HttpHeaders().set('Authorization', `Bearer ${this.token}`);
         return this.http.get(`${this.baseUrl}employee/employeedetails`, { headers });
     }
@@ -46,8 +46,8 @@ export class ApiService {
     templateDeleted$ = this.templateDeleted.asObservable();
 
     setNewEmployee(empData: Employee) {
-        const headers = new HttpHeaders().set('Authorization', `Bearer ${this.token}`);
-        return this.http.post(`${this.baseUrl}employee/register`, empData, { headers });
+        // const headers = new HttpHeaders().set('Authorization', `Bearer ${this.token}`);
+        return this.http.post(`${this.baseUrl}employee/register`, empData);
     }
 
     getTemplates() {
@@ -152,6 +152,7 @@ export class ApiService {
     }
 
     getCompletedSurveys() {
+        // this.spinner.show()
         const headers = new HttpHeaders().set('Authorization', `Bearer ${this.token}`);
         return this.http.get(`${this.baseUrl}survey/completedsurveys`, { headers });
     }

@@ -4,7 +4,7 @@
 </div>
 <div class="modal-sub-header">
     <div class="stepper-wizard w-480px justify-content-between">
-        <div class="step" [ngClass]="{ 'active': activeStep === 1 }" (click)="updateActiveStep(1)">
+        <div class="step" [ngClass]="{ 'active': activeStep === currentStep.basicFields }">
             <div class="step-number">
                 <span>1</span>
             </div>
@@ -12,7 +12,7 @@
                 <span>BASIC FIELDS</span>
             </label>
         </div>
-        <div class="step" [ngClass]="{ 'active': activeStep === 2 }" (click)="updateActiveStep(2)">
+        <div class="step" [ngClass]="{ 'active': activeStep === currentStep.surveyQuestions }">
             <div class="step-number">
                 <span>2</span>
             </div>
@@ -22,29 +22,37 @@
         </div>
     </div>
     <div>
-        <button class="btn btn-primary" *ngIf="activeStep === 1" (click)="onSave()">Save & Continue</button>
-        <div *ngIf="activeStep === 2" class="d-flex justify-content-between w-150">
-            <button class="btn btn-secondary">Back</button>
+        <button class="btn btn-primary" *ngIf="activeStep === currentStep.basicFields" [disabled]="basicFieldsForm.invalid" (click)="onSave()">Save & Continue</button>
+        <div *ngIf="activeStep === currentStep.surveyQuestions" class="d-flex justify-content-between w-150">
+            <button class="btn btn-secondary" (click)="updateActiveStep(currentStep.basicFields)">Back</button>
             <button class="btn btn-primary" (click)="addTemplateQuestions()" >Launch</button>
         </div>
     </div>
 </div>
 <div class="modal-body">
-    <div *ngIf="activeStep === 1">
+    <div *ngIf="activeStep === currentStep.basicFields">
         <div class="form-group">
-            <form [formGroup]="basicFieldsForm" >
+            <form [formGroup]="basicFieldsForm">
                 <div>
-                    <label> Title of this survey </label>
+                    <label> Title of the template </label>
                     <input type="text" class="form-control input-sm w-50" formControlName="templateTitle"/>
+                    <div *ngIf="basicFieldsForm.get('templateTitle')?.invalid && basicFieldsForm.get('templateTitle')?.touched" class="error-message">
+                        <div *ngIf="basicFieldsForm.get('templateTitle')?.errors?.['required']"> Template title is required </div>
+                    </div>
                 </div>
                 <div>
                     <label>Description</label>
                     <input type="text" class="form-control input-sm w-50" formControlName="templateDescription"/>
+                    <div *ngIf="basicFieldsForm.get('templateDescription')?.invalid && basicFieldsForm.get('templateDescription')?.touched"
+                    class="error-message">
+                    <div *ngIf="basicFieldsForm.get('templateDescription')?.errors?.['required']">Description is
+                        required</div>
+                    </div>                    
                 </div>
             </form>
         </div>
     </div> 
-    <div *ngIf="activeStep === 2">
+    <div *ngIf="activeStep === currentStep.surveyQuestions">
         <div *ngFor="let response of formResponses; let i = index" class="d-flex w-75">
             <accordion [closeOthers]="true" class="w-100">
                 <ng-container>
@@ -70,11 +78,11 @@
                                                 <label for="Rating_{{i}}" class="radio-button-labels">Rating</label>
                                                 <input type="radio" formControlName="radiobutton" id="Commentonly_{{i}}" value="Text">
                                                 <label for="Commentonly_{{i}}" class="radio-button-labels">Comment only</label>
-                                                <input type="radio" formControlName="radiobutton" id="option3_{{i}}" value="Select one from list">
+                                                <input type="radio" formControlName="radiobutton" id="option3_{{i}}" value="SelectOneFromList">
                                                 <label for="option3_{{i}}" class="radio-button-labels">Select one from list</label>
                                             </div>
                                         </div>
-                                        <a *ngIf="formResponses[i]?.templateQuestionForm.get('radiobutton')?.value === 'Select one from list'" (click)="addInputField(i)" >+ Add More options</a>
+                                        <a *ngIf="formResponses[i]?.templateQuestionForm.get('radiobutton')?.value === 'SelectOneFromList'" (click)="addInputField(i)" >+ Add More options</a>
                                         <div class="d-flex">
                                             <div formArrayName="inputFields">
                                                 <div *ngFor="let inputField of response.templateQuestionForm.get('inputFields')?.controls; let j = index">
